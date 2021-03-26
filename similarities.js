@@ -16,7 +16,7 @@ for (object of rawdata) {
     text.push(obj.review)
   }
 
-  const results = func.analyze(3, text)
+  const results = func.analyze(2, text)
   allData.push(results)
 }
 

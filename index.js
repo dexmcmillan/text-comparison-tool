@@ -34,7 +34,6 @@ function analyze(searchDepth, text) {
         slice.forEach(item => {
           phrase += " " + item
         })
-        console.log(`Phrase: ${phrase}`)
         stringInfo.words.push(phrase.trim())
       }
     }
@@ -52,6 +51,7 @@ function analyze(searchDepth, text) {
       }
 
     }
+
   }
 
   // Calculate the similarity score.
@@ -68,6 +68,16 @@ function analyze(searchDepth, text) {
     results.similarityScore = 0.00
   }
 
+  // Filter to return only those comparisons that have matched.
+  for (stringObj of results.stringObjects) {
+    delete stringObj.words
+    stringObj.matches = stringObj.matches.filter(function(value, index, arr){
+          return value.matchedPhrases.length !== 0;
+      });
+
+
+  }
+  results
   return results
 }
 
