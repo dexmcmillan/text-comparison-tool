@@ -57,4 +57,4 @@ will return...
 }]`
 
 ### similarityScore(text)
-The similarityScore function takes one argument: an array of strings. It will run analyze() on them, but will instead return an average of all the match counts, creating an overall similarity index for the group of strings that is useful when compared to other arrays of strings run through this function.
+The similarityScore function takes the same arguments as analyze(). It will run analyze() but will instead return an average of all the match counts, creating an overall similarity index for the group of strings that is useful when compared to other arrays of strings run through this function.
