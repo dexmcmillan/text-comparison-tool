@@ -1,7 +1,11 @@
 # Text Comparison Tool
 ### March 25, 2021
 
-Originally created as part of a CBC project to analyze Google reviews to be able to tell which were similar enough to warrant further investigation.
+An npm package originally created as part of a CBC project to analyze Google reviews to be able to tell which were similar enough to warrant further investigation.
+
+## Install
+
+`npm install text-analysis`
 
 This package exposes two functions:
 
