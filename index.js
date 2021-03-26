@@ -1,12 +1,17 @@
 const fs = require('fs')
 
+
+
+
+
+
+
+
 function analyze(searchDepth, text) {
 
   const results = {
     stringObjects: [],
-    get stringsCompared() {
-      return this.stringObjects.length
-    },
+    stringsCompared: 0,
     similarityScore: 0,
   }
 
@@ -15,13 +20,6 @@ function analyze(searchDepth, text) {
       string: text[string],
       words: [],
       matches: [],
-      get count() {
-        let matchCount = 0
-        this.matches.forEach(item => {
-          matchCount += item.count;
-        })
-        return matchCount
-      },
 
     }
 
@@ -47,21 +45,25 @@ function analyze(searchDepth, text) {
     for (k = 1 + i; k < results.stringObjects.length; k++) {
 
       if (results.stringObjects[i].string !== "" && results.stringObjects[k].string !== "") {
-        results.stringObjects[i].matches.push(getMatches(results.stringObjects[i], results.stringObjects[k]))
+        const matchResult = getMatches(results.stringObjects[i], results.stringObjects[k])
+        results.stringObjects[i].matches.push(matchResult)
+        results.stringObjects[k].matches.push(matchResult)
       }
 
     }
-
   }
 
   // Calculate the similarity score.
-  let total = 0
+  let numMatches = 0
+  let numTotal = 0
   results.stringObjects.forEach(obj => {
-    total += obj.count
-
+    obj.matches.forEach(object => {
+      numMatches += object.count
+    })
+    numTotal += obj.matches.length
   })
 
-  let score = total / results.stringObjects.length
+  let score = numMatches / numTotal
   if (!isNaN(score)) {
     results.similarityScore = parseFloat(score.toFixed(2))
   } else {
@@ -72,14 +74,23 @@ function analyze(searchDepth, text) {
   for (stringObj of results.stringObjects) {
     delete stringObj.words
     stringObj.matches = stringObj.matches.filter(function(value, index, arr){
-          return value.matchedPhrases.length !== 0;
-      });
-
-
+        return (value.matchedPhrases.length !== 0);
+    });
   }
-  results
+  results.stringObjects = results.stringObjects.filter(function(value, index, arr){
+      return value.matches.length !== 0;
+  });
+  results.stringsCompared =  results.stringObjects.length
   return results
 }
+
+
+
+
+
+
+
+
 
 function getMatches(stringObject1, stringObject2) {
 
