@@ -12,7 +12,9 @@ Text is an array of strings that you want to run comparisons on. The function wi
 
 Depth specifies how fine you want to be able to detect similarities and can be a number between 1 and 3 inclusive. An input of 1 will break each string in the text array into individual words and look for matches between other strings in the array. An input of 2 will break each string into two word chunks.
 
-`analyze(1, ["This is a test", "A test phrase.", "Testing."])`
+```javascript
+analyze(1, ["This is a test", "A test phrase.", "Testing."])
+```
 
 This function will return an array of objects that looks like this:
 
@@ -37,11 +39,14 @@ This function will return an array of objects that looks like this:
 
 This function...
 
-```analyze(1, ["This is a test", "A test phrase.", "Testing."])```
+```javascript
+analyze(1, ["This is a test", "A test phrase.", "Testing."])
+```
 
 will return...
 
-```[{
+```javascript
+[{
   "firststring": "This is a test",
   "secondstring": "A test phrase.",
   "matchedWords": ["a test"],
@@ -56,7 +61,8 @@ will return...
   "secondstring": "Testing.",
   "matchedWords": [],
   "count": 0
-}]```
+}]
+```
 
 ## 2. similarityScore(text)
 The similarityScore function takes the same arguments as analyze(). It will run analyze() but will instead return an average of all the match counts, creating an overall similarity index for the group of strings that is useful when compared to other arrays of strings run through this function.
