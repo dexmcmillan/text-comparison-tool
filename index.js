@@ -3,7 +3,7 @@ const fs = require('fs')
 const sample = [
   "This is a piece of some sample text",
   "This is also sample text, this is.",
-  "Text",
+  "Text is here.",
   "Here's some sample text.",
   "More text"
 ]
@@ -18,6 +18,7 @@ function prepData(data) {
 }
 
 function analyze(text) {
+  console.log(text.length)
   const stringsArray = []
 
   for (string in text) {
@@ -31,7 +32,8 @@ function analyze(text) {
         return this.matches.length;
       }
     }
-    stringInfo.words = sample[string].toLowerCase().replace(".", "").split(" ")
+    stringInfo.words = sample[string].toLowerCase().replace(/,|\.|'/gi, "").split(" ")
+
 
     for (word in stringInfo.words) {
 
@@ -50,56 +52,69 @@ function analyze(text) {
 
 
     }
-
-    getMatches(1, stringsArray)
-    getMatches(2, stringsArray)
     stringsArray.push(stringInfo)
   }
+  console.log(stringsArray)
+  const matches = getMatches(3, stringsArray)
 
-  return prepData(stringsArray)
+  return prepData(matches)
 }
 
 function getMatches(inputWordArray, arrayofStrings) {
-  // For each stringInfo object...
-  for (i = 0;i <= arrayofStrings.length; i++) {
+  const matches = []
 
-    for (k = 1; k < arrayofStrings.length; k++) {
-      const next = parseInt(i) + k
+  // For each stringInfo object...
+  for (i = 0;i < arrayofStrings.length; i++) {
+
+    for (k = 1+i; k < arrayofStrings.length; k++) {
+
       switch (inputWordArray) {
         case 1:
           thisWordArray = arrayofStrings[i].words
-          nextWordArray = arrayofStrings[next].words
+          nextWordArray = arrayofStrings[k].words
           break
         case 2:
           thisWordArray = arrayofStrings[i].twoWords
-          nextWordArray = arrayofStrings[next].twoWords
+          nextWordArray = arrayofStrings[k].twoWords
           break
         case 3:
           thisWordArray = arrayofStrings[i].threeWords
-          nextWordArray = arrayofStrings[next].threeWords
+          nextWordArray = arrayofStrings[k].threeWords
           break
       }
 
-
+      const match = {
+        firststring: arrayofStrings[i].string,
+        secondstring: arrayofStrings[k].string,
+        matchedWords: [],
+        get count() {
+          return this.matchedWords.length;
+        }
+      }
 
       // For each word in a string...
       for (r = 0; r < thisWordArray.length; r++) {
         // Compare it to each word in the next string in the array.
         for (j = 0;j < nextWordArray.length; j++) {
           if (thisWordArray[r] === nextWordArray[j]) {
+
             const array = [thisWordArray[r], nextWordArray[j]]
-            arrayofStrings[i].matches.push(array)
-            arrayofStrings[next].matches.push(array)
+            match.matchedWords.push(thisWordArray[r])
+
             console.log(`Matching word "${thisWordArray[r]}" with word "${nextWordArray[j]}". Result: Hit!`)
           }
           else {
             console.log(`Matching word "${thisWordArray[r]}" with word "${nextWordArray[j]}". Result: Not a match.`)
+
           }
 
         }
       }
+      matches.push(match)
     }
+
   }
+  return matches
 }
 
 
