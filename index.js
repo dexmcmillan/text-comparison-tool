@@ -11,7 +11,7 @@ for (obj of reviews) {
   sample.push(obj.review)
 }
 
-const results = func.analyze(3, sample)
+const results = func.analyze(2, sample)
 
 const score = func.similarityScore(sample)
 console.log(score)
