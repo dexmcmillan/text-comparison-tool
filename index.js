@@ -1,126 +1,117 @@
 const fs = require('fs')
 
-function prepData(data) {
-  data.forEach(obj => {
-    delete obj.twoWords
-    delete obj.threeWords
-    delete obj.words
-  })
-  return data
-}
-
 function analyze(searchDepth, text) {
-  const stringsArray = []
+
+  const results = {
+    stringObjects: [],
+    get stringsCompared() {
+      return this.stringObjects.length
+    },
+    similarityScore: 0,
+  }
 
   for (string in text) {
     const stringInfo = {
       string: text[string],
       words: [],
-      twoWords: [],
-      threeWords: [],
       matches: [],
       get count() {
-        return this.matches.length;
-      }
-    }
-    stringInfo.words = text[string].toLowerCase().replace(/,|\.|'|!|;|:|\(|\)/gi, "").split(" ")
-
-
-    for (word in stringInfo.words) {
-
-      const next = parseInt(word) + 1
-      const next_next = parseInt(word) + 2
-
-      if (word < stringInfo.words.length-1) {
-        const wordCombo2 = stringInfo.words[word] + " " + stringInfo.words[next]
-        stringInfo.twoWords.push(wordCombo2)
-      }
-
-      if (word < stringInfo.words.length-2) {
-        const wordCombo3 = stringInfo.words[word] + " " + stringInfo.words[next] + " " + stringInfo.words[next_next]
-        stringInfo.threeWords.push(wordCombo3)
-      }
-
+        let matchCount = 0
+        this.matches.forEach(item => {
+          matchCount += item.count;
+        })
+        return matchCount
+      },
 
     }
-    stringsArray.push(stringInfo)
+
+    const words = text[string].toLowerCase().replace(/,|\.|'|!|;|:|\(|\)/gi, "").split(" ")
+
+    for (pos in words) {
+      const slice = words.slice(pos, parseInt(searchDepth) + parseInt(pos))
+      if (slice.length === searchDepth) {
+        let phrase = ""
+        slice.forEach(item => {
+          phrase += " " + item
+        })
+        console.log(`Phrase: ${phrase}`)
+        stringInfo.words.push(phrase.trim())
+      }
+    }
+
+
+    results.stringObjects.push(stringInfo)
   }
-  console.log(stringsArray)
-  const matches = getMatches(searchDepth, stringsArray)
-
-  return prepData(matches)
-}
-
-function getMatches(inputWordArray, arrayofStrings) {
-  const matches = []
 
   // For each stringInfo object...
-  for (i = 0;i < arrayofStrings.length; i++) {
+  for (i = 0; i < results.stringObjects.length; i++) {
+    for (k = 1 + i; k < results.stringObjects.length; k++) {
 
-    for (k = 1+i; k < arrayofStrings.length; k++) {
-
-      if (arrayofStrings[i].string !== "" && arrayofStrings[k].string !== "") {
-        console.log(`Comparing "${arrayofStrings[i].string}" with "${arrayofStrings[k].string}"...`)
-
-        switch (inputWordArray) {
-          case 1:
-            thisWordArray = arrayofStrings[i].words
-            nextWordArray = arrayofStrings[k].words
-            break
-          case 2:
-            thisWordArray = arrayofStrings[i].twoWords
-            nextWordArray = arrayofStrings[k].twoWords
-            break
-          case 3:
-            thisWordArray = arrayofStrings[i].threeWords
-            nextWordArray = arrayofStrings[k].threeWords
-            break
-        }
-
-        const match = {
-          firststring: arrayofStrings[i].string,
-          secondstring: arrayofStrings[k].string,
-          matchedWords: [],
-          get count() {
-            return this.matchedWords.length;
-          }
-        }
-
-        // For each word in a string...
-        for (r = 0; r < thisWordArray.length; r++) {
-          // Compare it to each word in the next string in the array.
-          for (j = 0;j < nextWordArray.length; j++) {
-            if (thisWordArray[r] === nextWordArray[j]) {
-              const array = [thisWordArray[r], nextWordArray[j]]
-              match.matchedWords.push(thisWordArray[r])
-            }
-
-          }
-        }
-        matches.push(match)
-
+      if (results.stringObjects[i].string !== "" && results.stringObjects[k].string !== "") {
+        results.stringObjects[i].matches.push(getMatches(results.stringObjects[i], results.stringObjects[k]))
       }
 
     }
-
   }
-  return matches
+
+  // Calculate the similarity score.
+  let total = 0
+  results.stringObjects.forEach(obj => {
+    total += obj.count
+
+  })
+
+  let score = total / results.stringObjects.length
+  if (!isNaN(score)) {
+    results.similarityScore = parseFloat(score.toFixed(2))
+  } else {
+    results.similarityScore = 0.00
+  }
+
+  return results
+}
+
+function getMatches(stringObject1, stringObject2) {
+
+  console.log(`Comparing "${stringObject1.string}" with "${stringObject2.string}"...`)
+
+  const match = {
+    comparedWith: stringObject2.string,
+    matchedPhrases: [],
+    get count() {
+      return this.matchedPhrases.length;
+    }
+  }
+
+  // For each word in a string...
+  for (r = 0; r < stringObject1.words.length; r++) {
+    // Compare it to each word in the next string in the array.
+    for (j = 0; j < stringObject2.words.length; j++) {
+      if (stringObject1.words[r] === stringObject2.words[j]) {
+        match.matchedPhrases.push(stringObject1.words[r])
+      }
+
+    }
+  }
+  return match
 }
 
 function similarityScore(depth, text) {
+
   const analyzedObjArray = analyze(depth, text)
+
   let total = 0
-  analyzedObjArray.forEach(obj => {
-    total += obj.count
-  })
-  let score = total / analyzedObjArray.length
-  if (!isNaN(score)) {
-    return score.toFixed(2)
-  }
-  else {
-    return 0.00
+
+  const similarity = {
+    name: "",
+    score: 0,
+    analyzed: 0,
   }
 
+
+
+
+  return similarity
 }
 
 exports.analyze = analyze
