@@ -4,8 +4,6 @@ const func = require('./analyzer.js')
 const rawdata = JSON.parse(fs.readFileSync('./data-reviews.json'));
 
 
-
-
 const allData = []
 
 for (object of rawdata) {

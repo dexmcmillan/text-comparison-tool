@@ -40,7 +40,7 @@ This function will return an array of objects that looks like this:
 This function...
 
 ```javascript
-analyze(1, ["This is a test", "A test phrase.", "Testing."])
+analyze(2, ["This is a test", "A test phrase.", "Testing."])
 ```
 
 will return...
