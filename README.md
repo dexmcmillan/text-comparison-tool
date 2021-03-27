@@ -7,66 +7,59 @@ An npm package originally created as part of a CBC project to analyze Google rev
 
 `npm install text-analysis`
 
-This package exposes two functions:
+## The function
 
-## 1. analyze(depth, text)
-This is the main function, which takes two arguments: depth and text.
+This package exposes just one function:
+```javascript
+analyze(text)
+```
 
-Text is an array of strings that you want to run comparisons on. The function will break each string into parts and compare them all against each other string in the array. It will count the number of exact matches between each phrase.
-
-Depth specifies how fine you want to be able to detect similarities and can be a number between 1 and 3 inclusive. An input of 1 will break each string in the text array into individual words and look for matches between other strings in the array. An input of 2 will break each string into two word chunks.
+This function takes an array of strings as an argument. It will break each string down into 2-10 word chunks and compare to all other strings in the array that is passed.
 
 ```javascript
-analyze(1, ["This is a test", "A test phrase.", "Testing."])
+const ta = require('text-analysis')
+
+ta.analyze(["This is a test.", "here is a test string.", "this a test string. It is cool"])
 ```
 
 This function will return an array of objects that looks like this:
 
 ```javascript
-[{
-  "firststring": "This is a test",
-  "secondstring": "A test phrase.",
-  "matchedWords": ["a", "test"],
-  "count": 2
-}, {
-  "firststring": "This is a test",
-  "secondstring": "Testing.",
-  "matchedWords": [],
-  "count": 0
-}, {
-  "firststring": "A test phrase.",
-  "secondstring": "Testing.",
-  "matchedWords": [],
-  "count": 0
-}]
+{
+  "stringObjects": [{
+    "string": "This is a test.",
+    "matches": [{
+      "comparedWith": "here is a test string.",
+      "matchedPhrases": ["is a test"],
+      "count": 1,
+      "percentMatch": 0.6
+    }],
+    "averageSimilarity": 0.3
+  }, {
+    "string": "here is a test string.",
+    "matches": [{
+      "comparedWith": "This is a test.",
+      "matchedPhrases": ["is a test"],
+      "count": 1,
+      "percentMatch": 0.75
+    }, {
+      "comparedWith": "this a test string. It is cool",
+      "matchedPhrases": ["a test string"],
+      "count": 1,
+      "percentMatch": 0.43
+    }],
+    "averageSimilarity": 0.59
+  }, {
+    "string": "this a test string. It is cool",
+    "matches": [{
+      "comparedWith": "here is a test string.",
+      "matchedPhrases": ["a test string"],
+      "count": 1,
+      "percentMatch": 0.6
+    }],
+    "averageSimilarity": 0.3
+  }],
+  "stringsCompared": 3,
+  "averageSimilarityAll": 0.4
+}
 ```
-
-This function...
-
-```javascript
-analyze(2, ["This is a test", "A test phrase.", "Testing."])
-```
-
-will return...
-
-```javascript
-[{
-  "firststring": "This is a test",
-  "secondstring": "A test phrase.",
-  "matchedWords": ["a test"],
-  "count": 1
-}, {
-  "firststring": "This is a test",
-  "secondstring": "Testing.",
-  "matchedWords": [],
-  "count": 0
-}, {
-  "firststring": "A test phrase.",
-  "secondstring": "Testing.",
-  "matchedWords": [],
-  "count": 0
-}]
-```
-
-## 2. similarityScore(text)
-The similarityScore function takes the same arguments as analyze(). It will run analyze() but will instead return an average of all the match counts, creating an overall similarity index for the group of strings that is useful when compared to other arrays of strings run through this function.

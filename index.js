@@ -16,7 +16,7 @@ function getMatches(stringObject1, stringObject2) {
     get count() {
       return this.matchedPhrases.length;
     },
-    similar: 0,
+    percentMatch: 0,
   }
 
   const match2 = {
@@ -25,7 +25,7 @@ function getMatches(stringObject1, stringObject2) {
     get count() {
       return this.matchedPhrases.length;
     },
-    similar: 0,
+    percentMatch: 0,
   }
 
 
@@ -67,12 +67,11 @@ function processWords(input, searchDepth) {
 
 
 
-function analyze(searchDepth, text) {
+function analyze(text) {
 
   const results = {
     stringObjects: [],
     stringsCompared: 0,
-    similarityScore: 0,
   }
 
   for (string in text) {
@@ -84,7 +83,7 @@ function analyze(searchDepth, text) {
 
     let max = 9
 
-    for (i = searchDepth; i <= max; i++) {
+    for (i = 3; i <= max; i++) {
       const words = processWords(stringInfo.string, i)
       words.forEach(word => {
         stringInfo.words.push(word)
@@ -113,7 +112,12 @@ function analyze(searchDepth, text) {
 
 
   // Filter to return only those comparisons that have matched.
+
+  results.averageSimilarityAll = 0
+  let sumSimilarityScores = 0
+
   for (stringObj of results.stringObjects) {
+
     let sumOfSimilar = 0
     const allMatchesIncZero = stringObj.matches.length
     delete stringObj.words
@@ -131,15 +135,17 @@ function analyze(searchDepth, text) {
     stringObj.matches.forEach(match => {
       const allWordCount = match.comparedWith.split(" ").length
       const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
-      match.similar = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
-      sumOfSimilar += match.similar
+      match.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
+      sumOfSimilar += match.percentMatch
     })
     stringObj.averageSimilarity = (Math.round((sumOfSimilar/allMatchesIncZero) * 100) / 100)
+    sumSimilarityScores+=stringObj.averageSimilarity
   }
+  results.averageSimilarityAll = (Math.round((sumSimilarityScores/results.stringObjects.length) * 100) / 100)
   results.stringObjects = results.stringObjects.filter(function(value, index, arr){
       return value.matches.length !== 0;
   });
-  results.stringsCompared =  results.stringObjects.length
+  results.stringsCompared = results.stringObjects.length
   return results
 }
 
