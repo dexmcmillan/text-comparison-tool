@@ -5,11 +5,13 @@ const fs = require('fs')
 
 
 
-
+// This function takes two strings and returns two match objects, one which describes the match to the first word and one that describes
+// the match to the other.
 function getMatches(stringObject1, stringObject2) {
-
+  // This next line can optionally be uncommented to help with debugging.
   // console.log(`Comparing "${stringObject1.string}" with "${stringObject2.string}"...`)
 
+  // The only difference between these matches is the comparedWith property.
   const match = {
     comparedWith: stringObject2.string,
     matchedPhrases: [],
@@ -27,9 +29,7 @@ function getMatches(stringObject1, stringObject2) {
     },
     percentMatch: 0,
   }
-
-
-
+  // Now we compare the two words to find out if they match or not. If they do, push them to match.matchedPhrases and match2.matchedPhrases
   // For each word in a string...
   for (r = 0; r < stringObject1.words.length; r++) {
     // Compare it to each word in the next string in the array.
@@ -47,7 +47,7 @@ function getMatches(stringObject1, stringObject2) {
 
 
 
-
+// This function breaks up the string into various chunks, beggining with 3 word chunks and going all the way up to the length of the string.
 function processWords(input, searchDepth) {
   const words = input.toLowerCase().replace(/,|\.|'|!|;|:|\(|\)/gi, "").split(" ")
   const processed = []
@@ -66,7 +66,7 @@ function processWords(input, searchDepth) {
 }
 
 
-
+// This is the main function that will call other non-exported functions in this file.
 function analyze(text) {
 
   const results = {
@@ -81,9 +81,9 @@ function analyze(text) {
       matches: [],
     }
 
-    let max = 9
+    const stringWordLength = stringInfo.string.split(" ").length
 
-    for (i = 3; i <= max; i++) {
+    for (i = 3; i <= stringWordLength; i++) {
       const words = processWords(stringInfo.string, i)
       words.forEach(word => {
         stringInfo.words.push(word)
@@ -91,7 +91,7 @@ function analyze(text) {
 
     }
 
-
+    console.log(stringInfo)
     results.stringObjects.push(stringInfo)
   }
 
