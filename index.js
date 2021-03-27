@@ -15,8 +15,20 @@ function getMatches(stringObject1, stringObject2) {
     matchedPhrases: [],
     get count() {
       return this.matchedPhrases.length;
-    }
+    },
+    similar: 0,
   }
+
+  const match2 = {
+    comparedWith: stringObject1.string,
+    matchedPhrases: [],
+    get count() {
+      return this.matchedPhrases.length;
+    },
+    similar: 0,
+  }
+
+
 
   // For each word in a string...
   for (r = 0; r < stringObject1.words.length; r++) {
@@ -24,11 +36,13 @@ function getMatches(stringObject1, stringObject2) {
     for (j = 0; j < stringObject2.words.length; j++) {
       if (stringObject1.words[r] === stringObject2.words[j]) {
         match.matchedPhrases.push(stringObject1.words[r])
+        match2.matchedPhrases.push(stringObject1.words[r])
       }
 
     }
   }
-  return match
+
+  return [match, match2]
 }
 
 
@@ -89,35 +103,21 @@ function analyze(searchDepth, text) {
     for (k = 1 + i; k < results.stringObjects.length; k++) {
 
       if (results.stringObjects[i].string !== "" && results.stringObjects[k].string !== "") {
-        const matchResult = getMatches(results.stringObjects[i], results.stringObjects[k])
-        results.stringObjects[i].matches.push(matchResult)
-        results.stringObjects[k].matches.push(matchResult)
+        let matchResult = getMatches(results.stringObjects[i], results.stringObjects[k])
+        results.stringObjects[i].matches.push(matchResult[0])
+        results.stringObjects[k].matches.push(matchResult[1])
       }
 
     }
   }
 
 
-  // Calculate the similarity score.
-  let numMatches = 0
-  let numTotal = 0
-  results.stringObjects.forEach(obj => {
-    obj.matches.forEach(object => {
-      numMatches += object.count
-    })
-    numTotal += obj.matches.length
-  })
-
-  let score = numMatches / numTotal
-  if (!isNaN(score)) {
-    results.similarityScore = parseFloat(score.toFixed(2))
-  } else {
-    results.similarityScore = 0.00
-  }
-
   // Filter to return only those comparisons that have matched.
   for (stringObj of results.stringObjects) {
+    let sumOfSimilar = 0
+    const allMatchesIncZero = stringObj.matches.length
     delete stringObj.words
+
     stringObj.matches = stringObj.matches.filter(function(value, index, arr){
         return (value.matchedPhrases.length !== 0);
     });
@@ -125,6 +125,16 @@ function analyze(searchDepth, text) {
       phrases.matchedPhrases = reduceMatches(phrases.matchedPhrases)
     }
 
+    // Calculate percentage of words matching.
+
+
+    stringObj.matches.forEach(match => {
+      const allWordCount = match.comparedWith.split(" ").length
+      const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
+      match.similar = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
+      sumOfSimilar += match.similar
+    })
+    stringObj.averageSimilarity = (Math.round((sumOfSimilar/allMatchesIncZero) * 100) / 100)
   }
   results.stringObjects = results.stringObjects.filter(function(value, index, arr){
       return value.matches.length !== 0;
@@ -139,26 +149,23 @@ function analyze(searchDepth, text) {
 
 
 function reduceMatches(input) {
-  console.log(input)
-    for (word = 0; word < input.length-1; word++) {
+  for (word = 0; word < input.length; word++) {
 
-      for (m = 1; m < input.length-word; m++) {
-        console.log(`Word Num: ${word}. Nextword Num(m): ${m}`)
-        const nextWordPos = parseInt(input.indexOf(input[word])) + m
-        const nextWord = input[nextWordPos]
-        console.log(`word: ${input[word]}, next: ${nextWord}`)
-        if (input[word].split(" ").length > nextWord.split(" ").length) {
-          if (input[word].includes(nextWord)) {
-            input.splice(nextWordPos, 1)
-          }
+    for (m = 1; m < input.length-word; m++) {
+      const nextWordPos = parseInt(word) + m
+      const nextWord = input[nextWordPos]
+      if (input[word].split(" ").length > nextWord.split(" ").length) {
+        if (input[word].includes(nextWord)) {
+          input.splice(nextWordPos, 1)
         }
-        else if (input[word].split(" ").length < nextWord.split(" ").length) {
-          if (nextWord.includes(input[word])) {
-            input.splice(input[word], 1)
-          }
+      }
+      else if (input[word].split(" ").length < nextWord.split(" ").length) {
+        if (nextWord.includes(input[word])) {
+          input.splice(word, 1)
         }
       }
     }
+  }
   return input
 }
 
