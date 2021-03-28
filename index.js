@@ -7,39 +7,32 @@ const fs = require('fs')
 
 // This function takes two strings and returns two match objects, one which describes the match to the first word and one that describes
 // the match to the other.
-function getMatches(stringObject1, stringObject2) {
+function getMatches(stringObject) {
   // This next line can optionally be uncommented to help with debugging.
   // console.log(`Comparing "${stringObject1.string}" with "${stringObject2.string}"...`)
 
-  // The only difference between these matches is the comparedWith property.
-  const match = {
-    firstString: stringObject1.string,
-    secondString: stringObject2.string,
-    matchedPhrases: [],
-    get count() {
-      return this.matchedPhrases.length;
-    },
-    percentMatch: 0,
-  }
-  // Now we compare the two words to find out if they match or not. If they do, push them to match.matchedPhrases and match2.matchedPhrases
+
   // For each word in a string...
-  for (r = 0; r < stringObject1.words.length; r++) {
+  for (r = 0; r < stringObject.firstStringWords.length; r++) {
     // Compare it to each word in the next string in the array.
-    for (j = 0; j < stringObject2.words.length; j++) {
-      if (stringObject1.words[r] === stringObject2.words[j]) {
-        match.matchedPhrases.push(stringObject1.words[r])
+    for (j = 0; j < stringObject.secondStringWords.length; j++) {
+      if (stringObject.firstStringWords[r] === stringObject.secondStringWords[j]) {
+        stringObject.matchedPhrases.push(stringObject.firstStringWords[r])
       }
 
     }
   }
 
-  match.matchedPhrases = reduceMatches(match.matchedPhrases)
+  stringObject.matchedPhrases = reduceMatches(stringObject.matchedPhrases)
 
-  const allWordCount = match.secondString.split(" ").length
-  const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
-  match.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
+  const allWordCount = stringObject.secondString.split(" ").length
+  const matchedWordCount = stringObject.matchedPhrases.join(" ").split(" ").length
+  stringObject.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
 
-  return match
+  delete stringObject.firstStringWords
+  delete stringObject.secondStringWords
+
+  return stringObject
 }
 
 
@@ -73,10 +66,7 @@ function analyze(text) {
 
   let allResults = []
 
-  const results = {
-    stringObjects: [],
-    stringsCompared: 0,
-  }
+  const results = []
 
   for (string in text) {
     const stringInfo = {
@@ -85,26 +75,32 @@ function analyze(text) {
       matches: [],
     }
 
-    stringInfo.words = processWords(stringInfo.string)
-
-    results.stringObjects.push(stringInfo)
+    results.push(stringInfo)
   }
 
   // For each stringInfo object...
+  for (y = 0; y < results.length; y++) {
+    for (k = 1 + y; k < results.length-y; k++) {
 
-  for (i = 0; i < results.stringObjects.length; i++) {
-
-    for (k = 1 + i; k < results.stringObjects.length; k++) {
-
-      if (results.stringObjects[i].string !== "" && results.stringObjects[k].string !== "") {
-        let matchResult = getMatches(results.stringObjects[i], results.stringObjects[k])
-        allResults.push(matchResult)
+      const match = {
+        firstString: results[y].string,
+        secondString: results[k].string,
+        firstStringWords: [],
+        secondStringWords: [],
+        matchedPhrases: [],
+        get count() {
+          return this.matchedPhrases.length;
+        },
+        percentMatch: 0,
       }
 
+      match.firstStringWords = processWords(match.firstString)
+      match.secondStringWords = processWords(match.secondString)
+      let matchResult = getMatches(match)
+      allResults.push(matchResult)
     }
 
   }
-
 
   return allResults
 }
@@ -136,7 +132,6 @@ function reduceMatches(input) {
     }
   }
   toRemove =  [...new Set(toRemove.reverse())]
-  console.log(toRemove)
   toRemove.forEach(target => {
     input.splice(target, 1)
   })
