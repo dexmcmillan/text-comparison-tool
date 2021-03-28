@@ -20,7 +20,7 @@ const functions = require('./functions.js')
 //   allData.push(results)
 // }
 
-const results = func.analyze([
+const results = func.similarityIndex([
   "This is a test. It is a very long string which is fine because hopefully my program can handle strings that are longer than 10 words",
   "This is a test. It is a very long string which is fine because hopefully my program can handle strings that are longer than 10 words",
   "here is a test string.",
