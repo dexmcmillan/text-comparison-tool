@@ -62,7 +62,7 @@ function processWords(input) {
 
 function reduceMatches(input) {
   let toRemove = []
-  for (word = 0; word < input.length; word++) {
+  for (word = 0; word < Math.min(input.length,10); word++) {
 
     for (m = 1; m < input.length-word; m++) {
       const nextWordPos = parseInt(word) + m
