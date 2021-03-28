@@ -13,7 +13,7 @@ function getMatches(stringObject1, stringObject2) {
 
   // The only difference between these matches is the comparedWith property.
   const match = {
-    comparedWith: stringObject1.string,
+    firstString: stringObject1.string,
     secondString: stringObject2.string,
     matchedPhrases: [],
     get count() {
@@ -35,7 +35,7 @@ function getMatches(stringObject1, stringObject2) {
 
   match.matchedPhrases = reduceMatches(match.matchedPhrases)
 
-  const allWordCount = match.comparedWith.split(" ").length
+  const allWordCount = match.secondString.split(" ").length
   const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
   match.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
 
@@ -45,20 +45,25 @@ function getMatches(stringObject1, stringObject2) {
 
 
 // This function breaks up the string into various chunks, beggining with 3 word chunks and going all the way up to the length of the string.
-function processWords(input, searchDepth) {
+function processWords(input) {
   const words = input.toLowerCase().replace(/,|\.|'|!|;|:|\(|\)/gi, "").split(" ")
+  const stringWordLength = input.split(" ").length
   const processed = []
 
-  for (pos in words) {
-    const slice = words.slice(pos, parseInt(searchDepth) + parseInt(pos))
-    if (slice.length === searchDepth) {
-      let phrase = ""
-      slice.forEach(item => {
-        phrase += " " + item
-      })
-      processed.push(phrase.trim())
+  for (i = 3; i <= stringWordLength; i++) {
+    for (pos in words) {
+      const slice = words.slice(pos, parseInt(i) + parseInt(pos))
+      if (slice.length === i) {
+        let phrase = ""
+        slice.forEach(item => {
+          phrase += " " + item
+        })
+        processed.push(phrase.trim())
+      }
     }
+
   }
+
   return processed
 }
 
@@ -80,17 +85,8 @@ function analyze(text) {
       matches: [],
     }
 
-    const stringWordLength = stringInfo.string.split(" ").length
+    stringInfo.words = processWords(stringInfo.string)
 
-    for (i = 3; i <= stringWordLength; i++) {
-      const words = processWords(stringInfo.string, i)
-      words.forEach(word => {
-        stringInfo.words.push(word)
-      })
-
-    }
-
-    console.log(stringInfo)
     results.stringObjects.push(stringInfo)
   }
 
@@ -106,40 +102,10 @@ function analyze(text) {
       }
 
     }
-    console.log(allResults)
+
   }
 
 
-  // Filter to return only those comparisons that have matched.
-
-  results.averageSimilarityAll = 0
-  let sumSimilarityScores = 0
-
-  for (stringObj of results.stringObjects) {
-
-    let sumOfSimilar = 0
-    const allMatchesIncZero = stringObj.matches.length
-    delete stringObj.words
-
-    stringObj.matches = stringObj.matches.filter(function(value, index, arr){
-        return (value.matchedPhrases.length !== 0);
-    });
-
-    // Calculate percentage of words matching.
-
-
-    stringObj.matches.forEach(match => {
-
-      sumOfSimilar += match.percentMatch
-    })
-    stringObj.averageSimilarity = (Math.round((sumOfSimilar/allMatchesIncZero) * 100) / 100)
-    sumSimilarityScores+=stringObj.averageSimilarity
-  }
-  results.averageSimilarityAll = (Math.round((sumSimilarityScores/results.stringObjects.length) * 100) / 100)
-  results.stringObjects = results.stringObjects.filter(function(value, index, arr){
-      return value.matches.length !== 0;
-  });
-  results.stringsCompared = results.stringObjects.length
   return allResults
 }
 
