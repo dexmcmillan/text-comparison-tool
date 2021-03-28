@@ -1,39 +1,36 @@
 const fs = require('fs')
 
-
-
-
-
-
-// This function takes two strings and returns two match objects, one which describes the match to the first word and one that describes
-// the match to the other.
+// This function takes the comparison object and finds matches between the two strings listed.
 function getMatches(stringObject) {
-  // This next line can optionally be uncommented to help with debugging.
-  // console.log(`Comparing "${stringObject1.string}" with "${stringObject2.string}"...`)
 
-
-  // For each word in a string...
+// For each word in a string...
   for (r = 0; r < stringObject.firstStringWords.length; r++) {
     // Compare it to each word in the next string in the array.
     for (j = 0; j < stringObject.secondStringWords.length; j++) {
       if (stringObject.firstStringWords[r] === stringObject.secondStringWords[j]) {
         stringObject.matchedPhrases.push(stringObject.firstStringWords[r])
       }
-
     }
   }
 
+  // Removes smaller matches and just keeps the largest match found.
   stringObject.matchedPhrases = reduceMatches(stringObject.matchedPhrases)
 
-  const allWordCount = stringObject.secondString.split(" ").length
+  // Calculate a percentage that each string is similar to one another.
+  const allWordCount = stringObject.firstString.split(" ").length
   const matchedWordCount = stringObject.matchedPhrases.join(" ").split(" ").length
   stringObject.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
 
+  // Count matches.
+  stringObject.count = stringObject.matchedPhrases.length
+
+  // Remove properties from the comparison that we don't want to output.
   delete stringObject.firstStringWords
   delete stringObject.secondStringWords
 
   return stringObject
 }
+
 
 
 
@@ -61,60 +58,10 @@ function processWords(input) {
 }
 
 
-// This is the main function that will call other non-exported functions in this file.
-function analyze(text) {
-
-  let allResults = []
-
-  const results = []
-
-  for (string in text) {
-    const stringInfo = {
-      string: text[string],
-      words: [],
-      matches: [],
-    }
-
-    results.push(stringInfo)
-  }
-
-  // For each stringInfo object...
-  for (y = 0; y < results.length; y++) {
-    for (k = 1 + y; k < results.length-y; k++) {
-
-      const match = {
-        firstString: results[y].string,
-        secondString: results[k].string,
-        firstStringWords: [],
-        secondStringWords: [],
-        matchedPhrases: [],
-        get count() {
-          return this.matchedPhrases.length;
-        },
-        percentMatch: 0,
-      }
-
-      match.firstStringWords = processWords(match.firstString)
-      match.secondStringWords = processWords(match.secondString)
-      let matchResult = getMatches(match)
-      allResults.push(matchResult)
-    }
-
-  }
-
-  return allResults
-}
-
-
-
-
-
 
 function reduceMatches(input) {
   let toRemove = []
   for (word = 0; word < input.length; word++) {
-
-
 
     for (m = 1; m < input.length-word; m++) {
       const nextWordPos = parseInt(word) + m
@@ -141,8 +88,36 @@ function reduceMatches(input) {
 
 
 
+// This is the main function that will call other non-exported functions in this file.
+function analyze(text) {
 
+  let results = []
 
+  // For each stringInfo object...
+  for (y = 0; y < text.length; y++) {
+    console.log(text[y])
+    for (k = 1 + y; k < text.length; k++) {
 
+      // This object holds all of the information about each match and will be pushed to our results array and ouputted once processed.
+      const comparisonObject = {
+        firstString: "",
+        secondString: text[k],
+        firstStringWords: [],
+        secondStringWords: [],
+        matchedPhrases: [],
+        count: 0,
+        percentMatch: 0,
+      }
+      comparisonObject.firstString = text[y]
+      comparisonObject.firstStringWords = processWords(comparisonObject.firstString)
+      comparisonObject.secondStringWords = processWords(comparisonObject.secondString)
+      let matchResult = getMatches(comparisonObject)
+      results.push(matchResult)
+    }
+
+  }
+
+  return results
+}
 
 exports.analyze = analyze
