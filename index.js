@@ -155,23 +155,31 @@ function analyze(text) {
 
 
 function reduceMatches(input) {
+  let toRemove = []
   for (word = 0; word < input.length; word++) {
+
+
 
     for (m = 1; m < input.length-word; m++) {
       const nextWordPos = parseInt(word) + m
       const nextWord = input[nextWordPos]
       if (input[word].split(" ").length > nextWord.split(" ").length) {
         if (input[word].includes(nextWord)) {
-          input.splice(nextWordPos, 1)
+          toRemove.push(nextWordPos)
         }
       }
       else if (input[word].split(" ").length < nextWord.split(" ").length) {
         if (nextWord.includes(input[word])) {
-          input.splice(word, 1)
+          toRemove.push(word)
         }
       }
     }
   }
+  toRemove =  [...new Set(toRemove.reverse())]
+  console.log(toRemove)
+  toRemove.forEach(target => {
+    input.splice(target, 1)
+  })
   return input
 }
 

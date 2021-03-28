@@ -20,5 +20,5 @@ const functions = require('./functions.js')
 //   allData.push(results)
 // }
 
-const results = func.analyze(["This is a test. It si a very long string which is fine because hopefully my program can handle strings that are longer than 10 words", "here is a test string.", "this a test string. It is cool"])
+const results = func.analyze(["This is a test. It is a very long string which is fine because hopefully my program can handle strings that are longer than 10 words", "This is a test. It is a very long string which is fine because hopefully my program can handle strings that are longer than 10 words", "here is a test string.", "this a test string. It is cool"])
 functions.saveData(results, 'output', true, false)

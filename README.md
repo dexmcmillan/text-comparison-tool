@@ -7,9 +7,8 @@ An npm package originally created as part of a CBC project to analyze Google rev
 
 `npm install text-analysis`
 
-## The function
-
 This package exposes just one function:
+
 ```javascript
 analyze(text)
 ```
@@ -22,7 +21,7 @@ const ta = require('text-analysis')
 ta.analyze(["This is a test.", "here is a test string.", "this a test string. It is cool"])
 ```
 
-This function will return an array of objects that looks like this:
+This function will return an object that looks like this:
 
 ```javascript
 {
