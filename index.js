@@ -2,7 +2,6 @@ const fs = require('fs')
 
 // This function takes the comparison object and finds matches between the two strings listed.
 function getMatches(stringObject) {
-
 // For each word in a string...
   for (r = 0; r < stringObject.firstStringWords.length; r++) {
     // Compare it to each word in the next string in the array.
@@ -12,11 +11,8 @@ function getMatches(stringObject) {
       }
     }
   }
-
   // Removes smaller matches and just keeps the largest match found.
   stringObject.matchedPhrases = reduceMatches(stringObject.matchedPhrases)
-
-
 
   // Count matches.
   stringObject.count = stringObject.matchedPhrases.length
@@ -24,12 +20,9 @@ function getMatches(stringObject) {
   // Calculate a percentage that each string is similar to one another.
   let matchedWordCount = 0
   if (stringObject.matchedPhrases.length !== 0) {
-    console.log(stringObject.matchedPhrases.length)
     matchedWordCount = stringObject.matchedPhrases.join(" ").split(" ").length
   }
   const allWordCount = stringObject.firstString.split(" ").length
-
-  console.log(`"${stringObject.firstString}" compared with "${stringObject.secondString}" All words: ${allWordCount}, matched words: ${matchedWordCount}. Words: [${stringObject.matchedPhrases}]`)
   stringObject.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
 
   // Remove properties from the comparison that we don't want to output.
@@ -103,13 +96,12 @@ function analyze(text) {
 
   // For each stringInfo object...
   for (y = 0; y < text.length; y++) {
-    console.log(text[y])
     for (k = 1 + y; k < text.length; k++) {
 
       // This object holds all of the information about each match and will be pushed to our results array and ouputted once processed.
       const comparisonObject = {
         firstString: "",
-        secondString: "",
+        secondString: text[k],
         firstStringWords: [],
         secondStringWords: [],
         matchedPhrases: [],
@@ -117,12 +109,9 @@ function analyze(text) {
         percentMatch: 0,
       }
       comparisonObject.firstString = text[y]
-      comparisonObject.secondString = text[k]
       comparisonObject.firstStringWords = processWords(comparisonObject.firstString)
       comparisonObject.secondStringWords = processWords(comparisonObject.secondString)
-
       let matchResult = getMatches(comparisonObject)
-      console.log(comparisonObject)
       results.push(matchResult)
     }
 
@@ -138,8 +127,9 @@ function similarityIndex(text) {
     const num = (currentValue.percentMatch + accumulator)
     return num
   }, 0)
-
-  console.log(toLog/results.length)
+  const average = toLog/results.length
+  console.log(`Average similarity: ${(average*100).toFixed(2)}%`)
+  return average
 }
 
 exports.analyze = analyze
