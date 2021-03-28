@@ -13,16 +13,8 @@ function getMatches(stringObject1, stringObject2) {
 
   // The only difference between these matches is the comparedWith property.
   const match = {
-    comparedWith: stringObject2.string,
-    matchedPhrases: [],
-    get count() {
-      return this.matchedPhrases.length;
-    },
-    percentMatch: 0,
-  }
-
-  const match2 = {
     comparedWith: stringObject1.string,
+    secondString: stringObject2.string,
     matchedPhrases: [],
     get count() {
       return this.matchedPhrases.length;
@@ -36,13 +28,18 @@ function getMatches(stringObject1, stringObject2) {
     for (j = 0; j < stringObject2.words.length; j++) {
       if (stringObject1.words[r] === stringObject2.words[j]) {
         match.matchedPhrases.push(stringObject1.words[r])
-        match2.matchedPhrases.push(stringObject1.words[r])
       }
 
     }
   }
 
-  return [match, match2]
+  match.matchedPhrases = reduceMatches(match.matchedPhrases)
+
+  const allWordCount = match.comparedWith.split(" ").length
+  const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
+  match.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
+
+  return match
 }
 
 
@@ -68,6 +65,8 @@ function processWords(input, searchDepth) {
 
 // This is the main function that will call other non-exported functions in this file.
 function analyze(text) {
+
+  let allResults = []
 
   const results = {
     stringObjects: [],
@@ -103,11 +102,11 @@ function analyze(text) {
 
       if (results.stringObjects[i].string !== "" && results.stringObjects[k].string !== "") {
         let matchResult = getMatches(results.stringObjects[i], results.stringObjects[k])
-        results.stringObjects[i].matches.push(matchResult[0])
-        results.stringObjects[k].matches.push(matchResult[1])
+        allResults.push(matchResult)
       }
 
     }
+    console.log(allResults)
   }
 
 
@@ -125,17 +124,12 @@ function analyze(text) {
     stringObj.matches = stringObj.matches.filter(function(value, index, arr){
         return (value.matchedPhrases.length !== 0);
     });
-    for (phrases of stringObj.matches) {
-      phrases.matchedPhrases = reduceMatches(phrases.matchedPhrases)
-    }
 
     // Calculate percentage of words matching.
 
 
     stringObj.matches.forEach(match => {
-      const allWordCount = match.comparedWith.split(" ").length
-      const matchedWordCount = match.matchedPhrases.join(" ").split(" ").length
-      match.percentMatch = (Math.round((matchedWordCount/allWordCount) * 100) / 100)
+
       sumOfSimilar += match.percentMatch
     })
     stringObj.averageSimilarity = (Math.round((sumOfSimilar/allMatchesIncZero) * 100) / 100)
@@ -146,7 +140,7 @@ function analyze(text) {
       return value.matches.length !== 0;
   });
   results.stringsCompared = results.stringObjects.length
-  return results
+  return allResults
 }
 
 
