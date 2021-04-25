@@ -1,7 +1,7 @@
 # Text Comparison Tool
 ### March 28, 2021
 
-An npm package originally created as part of a CBC project to analyze Google reviews to be able to tell which were similar enough to warrant further investigation.
+An npm package originally created to compare arrays of strings to look for similarities.
 
 ## Install
 
